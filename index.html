@@ -72,9 +72,14 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
       font-size: 0.95rem;
       font-weight: bold;
+    }
+    .role-desc {
+      font-size: 0.8rem;
+      color: #64748b;
+      margin-bottom: 8px;
     }
     .status-badge {
       font-size: 0.75rem;
@@ -152,7 +157,9 @@
       <div class="note">
         🍎 <b>和平實小說書主題：健康</b>（請挑選與健康有關的故事）<br>
         ☀️ <b>活動時間</b>：週三大下課 10:40-11:10<br>
-        📢 <b>說書提醒</b>：說書人最晚請於<b>兩週前確認書名</b>，以利海報製作宣傳。<br>
+        🤝 <b>角色分工</b>：<br>
+         • <b>說書人</b>：主講故事（最晚請於<b>兩週前確認書名</b>以利海報製作）<br>
+         • <b>小幫手</b>：負責現場照相紀錄、引導及場控協助<br>
         🎂 <b>認領說明</b>：請填寫<b>出生月日 4 碼</b>（如 0521），方便日後本人修改書名或取消認領。<br>
         
         <div class="note-section">
@@ -251,6 +258,7 @@
               <span>🤝 小幫手</span>
               <span class="status-badge open">可認領</span>
             </div>
+            <div class="role-desc">📸 職責：現場照相紀錄、引導及場控協助</div>
             <input type="text" id="helper-name-${date}" placeholder="請填全名 (例: 陳大明)">
             <input type="text" id="helper-line-${date}" placeholder="Line ID">
             <input type="text" id="helper-class-${date}" placeholder="小孩班級 (例: 桂花班 陳小花)">
