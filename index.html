@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🍂 115秋學季 小學部說書人認領</title>
+  <style>
+    :root {
+      --primary: #d97706;
+      --primary-hover: #b45309;
+      --bg: #f8fafc;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans TC", sans-serif;
+      background-color: var(--bg);
+      color: #334155;
+      padding: 16px;
+      margin: 0;
+    }
+    .container {
+      max-width: 480px;
+      margin: 0 auto;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 16px;
+    }
+    h1 {
+      font-size: 1.25rem;
+      color: #78350f;
+      margin-bottom: 8px;
+    }
+    .note {
+      font-size: 0.85rem;
+      color: #92400e;
+      background: #fef3c7;
+      padding: 12px 14px;
+      border-radius: 8px;
+      line-height: 1.6;
+      text-align: left;
+      border: 1px solid #fde68a;
+    }
+    .note-section {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px dashed #d97706;
+    }
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      border: 1px solid #e2e8f0;
+    }
+    .card-title {
+      font-weight: bold;
+      font-size: 1.05rem;
+      color: #0f172a;
+      padding-bottom: 8px;
+      margin-bottom: 12px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .role-section {
+      background: #f8fafc;
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 10px;
+      border: 1px solid #e2e8f0;
+    }
+    .role-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 0.95rem;
+      font-weight: bold;
+    }
+    .status-badge {
+      font-size: 0.75rem;
+      padding: 2px 7px;
+      border-radius: 10px;
+      font-weight: normal;
+    }
+    .status-badge.open {
+      background: #dcfce7;
+      color: #166534;
+    }
+    .status-badge.closed {
+      background: #e2e8f0;
+      color: #475569;
+    }
+    input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 8px 10px;
+      margin-bottom: 6px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 0.88rem;
+    }
+    input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+    .btn-submit {
+      width: 100%;
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 8px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 0.88rem;
+    }
+    .btn-submit:hover {
+      background: var(--primary-hover);
+    }
+    .claimed-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.9rem;
+      margin-top: 4px;
+    }
+    .btn-link {
+      background: none;
+      border: none;
+      color: #dc2626;
+      font-size: 0.8rem;
+      cursor: pointer;
+      text-decoration: underline;
+      padding: 0;
+    }
+    .btn-edit {
+      color: var(--primary);
+      margin-right: 6px;
+    }
+    #loading {
+      text-align: center;
+      font-size: 0.9rem;
+      color: #64748b;
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🍂 115秋學季 小學部說書人認領</h1>
+      <div class="note">
+        ☀️ <b>活動時間</b>：週三大下課 10:40-11:10<br>
+        🎂 <b>認領說明</b>：請填寫<b>出生月日 4 碼</b>（如 0521），方便日後本人修改書名或取消認領。<br>
+        
+        <div class="note-section">
+          🧾 <b>說書手作材料費補助</b>：每回上限 $300（需檢附發票報帳，認領完成後請至群組記事本查詢）。
+        </div>
+      </div>
+    </header>
+
+    <div id="loading">載入場次資料中...</div>
+    <div id="slot-list"></div>
+  </div>
+
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbzePMLAqGZUIl3EuEO2a-TMTkSaMynuA8OwPm9tL4J8M-VYz8Xyik82UMjLX5qTn_KP/exec";
+
+    const dates = [
+      "9/09 (三) 10:40-11:10",
+      "9/16 (三) 10:40-11:10",
+      "9/23 (三) 10:40-11:10",
+      "10/14 (三) 10:40-11:10"
+    ];
+
+    function loadSlots() {
+      fetch(API_URL)
+        .then(res => res.json())
+        .then(data => renderSlots(data))
+        .catch(err => {
+          document.getElementById('loading').innerText = '載入失敗，請重新整理頁面。';
+        });
+    }
+
+    function renderSlots(slots) {
+      document.getElementById('loading').style.display = 'none';
+      const container = document.getElementById('slot-list');
+      container.innerHTML = '';
+
+      dates.forEach(date => {
+        const info = slots[date] || { speaker: '', helper: '', book: '' };
+        const card = document.createElement('div');
+        card.className = 'card';
+
+        let speakerHtml = '';
+        if (info.speaker) {
+          speakerHtml = `
+            <div class="role-header">
+              <span>👤 說書人</span>
+              <span class="status-badge closed">已認領</span>
+            </div>
+            <div class="claimed-row">
+              <div>
+                <b>${escapeHtml(info.speaker)}</b><br>
+                <span style="font-size:0.85rem; color:#475569;">📖 書名：${escapeHtml(info.book) || '<span style="color:#d97706;">（待補）</span>'}</span>
+              </div>
+              <div>
+                <button class="btn-link btn-edit" onclick="editBook('${date}', '${escapeAttr(info.book)}')">改書名</button>
+                <button class="btn-link" onclick="cancelRole('${date}', 'speaker')">取消</button>
+              </div>
+            </div>
+          `;
+        } else {
+          speakerHtml = `
+            <div class="role-header">
+              <span>👤 說書人</span>
+              <span class="status-badge open">可認領</span>
+            </div>
+            <input type="text" id="speaker-name-${date}" placeholder="說書人姓名">
+            <input type="text" maxlength="4" id="speaker-bday-${date}" placeholder="出生月日 4 碼 (例如 0521)">
+            <input type="text" id="speaker-book-${date}" placeholder="預計書名">
+            <button class="btn-submit" onclick="claimSpeaker('${date}')">認領說書人</button>
+          `;
+        }
+
+        let helperHtml = '';
+        if (info.helper) {
+          helperHtml = `
+            <div class="role-header">
+              <span>🤝 小幫手</span>
+              <span class="status-badge closed">已認領</span>
+            </div>
+            <div class="claimed-row">
+              <b>${escapeHtml(info.helper)}</b>
+              <button class="btn-link" onclick="cancelRole('${date}', 'helper')">取消</button>
+            </div>
+          `;
+        } else {
+          helperHtml = `
+            <div class="role-header">
+              <span>🤝 小幫手</span>
+              <span class="status-badge open">可認領</span>
+            </div>
+            <input type="text" id="helper-name-${date}" placeholder="小幫手姓名">
+            <input type="text" maxlength="4" id="helper-bday-${date}" placeholder="出生月日 4 碼 (例如 0521)">
+            <button class="btn-submit" onclick="claimHelper('${date}')">認領小幫手</button>
+          `;
+        }
+
+        card.innerHTML = `
+          <div class="card-title">📅 ${date}</div>
+          <div class="role-section">${speakerHtml}</div>
+          <div class="role-section">${helperHtml}</div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function sendApi(payload, successMsg) {
+      showLoading();
+      fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify(payload)
+      })
+      .then(res => res.json())
+      .then(res => {
+        if (res.success) {
+          alert(successMsg);
+        } else {
+          alert('❌ ' + res.message);
+        }
+        loadSlots();
+      })
+      .catch(err => {
+        alert('網路連線發生錯誤，請稍後再試！');
+        loadSlots();
+      });
+    }
+
+    function claimSpeaker(date) {
+      const name = document.getElementById(`speaker-name-${date}`).value.trim();
+      const bday = document.getElementById(`speaker-bday-${date}`).value.trim();
+      const book = document.getElementById(`speaker-book-${date}`).value.trim();
+
+      if (!name) return alert('請填寫說書人姓名！');
+      if (!bday || bday.length !== 4) return alert('請填寫出生月日 4 碼（例如 0521）！');
+
+      if (confirm(`確定要認領【${date}】的說書人嗎？`)) {
+        sendApi({ action: 'claim', role: 'speaker', date: date, name: name, birthday: bday, book: book }, '🎉 認領說書人成功！');
+      }
+    }
+
+    function claimHelper(date) {
+      const name = document.getElementById(`helper-name-${date}`).value.trim();
+      const bday = document.getElementById(`helper-bday-${date}`).value.trim();
+
+      if (!name) return alert('請填寫小幫手姓名！');
+      if (!bday || bday.length !== 4) return alert('請填寫出生月日 4 碼（例如 0521）！');
+
+      if (confirm(`確定要認領【${date}】的小幫手嗎？`)) {
+        sendApi({ action: 'claim', role: 'helper', date: date, name: name, birthday: bday, book: '' }, '🎉 認領小幫手成功！');
+      }
+    }
+
+    function editBook(date, currentBook) {
+      const bday = prompt(`【${date}】修改書名\n請輸入當初登記的「說書人出生月日 4 碼」（如 0521）：`);
+      if (bday === null) return;
+      if (!bday.trim()) return alert('請輸入出生月日！');
+
+      const newBook = prompt('請輸入更新後的書名：', currentBook || '');
+      if (newBook === null) return;
+
+      sendApi({ action: 'editBook', date: date, newBook: newBook.trim(), birthday: bday.trim() }, '✅ 書名更新成功！');
+    }
+
+    function cancelRole(date, role) {
+      const roleText = role === 'speaker' ? '說書人' : '小幫手';
+      const bday = prompt(`【${date}】取消認領${roleText}\n請輸入當初登記的「出生月日 4 碼」（如 0521）：`);
+      if (bday === null) return;
+      if (!bday.trim()) return alert('請輸入出生月日！');
+
+      sendApi({ action: 'cancel', date: date, role: role, birthday: bday.trim() }, `✅ 已取消【${date}】的${roleText}名額！`);
+    }
+
+    function showLoading() {
+      document.getElementById('slot-list').style.opacity = '0.4';
+      document.getElementById('slot-list').style.pointerEvents = 'none';
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    }
+    function escapeAttr(str) {
+      if (!str) return '';
+      return String(str).replace(/"/g, '&quot;');
+    }
+
+    window.onload = loadSlots;
+  </script>
+</body>
+</html>
