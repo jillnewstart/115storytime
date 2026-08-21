@@ -158,12 +158,13 @@
         🍎 <b>和平實小說書主題：健康</b>（請挑選與健康有關的故事）<br>
         ☀️ <b>活動時間</b>：週三大下課 10:40-11:10<br>
         🤝 <b>角色分工</b>：<br>
-         • <b>說書人</b>：主講故事（最晚請於<b>兩週前確認書名</b>以利海報製作）<br>
-         • <b>小幫手</b>：負責現場照相紀錄、引導及場控協助<br>
+        　• <b>說書人</b>：主講故事（最晚請於<b>兩週前確認書名</b>以利海報製作）<br>
+        　• <b>小幫手</b>：負責現場照相紀錄、引導及場控協助<br>
         🎂 <b>認領說明</b>：請填寫<b>出生月日 4 碼</b>（如 0521），方便日後本人修改書名或取消認領。<br>
         
         <div class="note-section">
-          🧾 <b>說書手作材料費補助</b>：每回上限 $300，<b>報帳明細不能是食物類</b>（需檢附發票報帳，認領完成後請至群組記事本查詢抬頭及統編）。
+          🧾 <b>說書手作材料費補助</b>：每回上限 $300，<b>報帳明細不能是食物類</b>（需檢附發票報帳，認領完成後請至群組記事本查詢抬頭及統編）。<br>
+          🌿 <b>溫馨提醒</b>：手作材料請先至<b>飛天樹屋</b>找<b>彥鈴老師</b>確認，若有類似庫存優先使用，感謝！🙏
         </div>
       </div>
     </header>
@@ -228,10 +229,10 @@
             </div>
             <input type="text" id="speaker-name-${date}" placeholder="請填全名 (例: 王小美)">
             <input type="text" id="speaker-line-${date}" placeholder="Line ID">
-            <input type="text" id="speaker-class-${date}" placeholder="小孩班級 (例: 月橘班)">
+            <input type="text" id="speaker-class-${date}" placeholder="小孩班級 (例: 月橘班 王小寶)">
             <input type="text" maxlength="4" id="speaker-bday-${date}" placeholder="出生月日 4 碼 (例如 0521)">
             <input type="text" id="speaker-book-${date}" placeholder="預計書名 (可後補)">
-            <input type="text" id="speaker-equip-${date}" placeholder="需求設備 (例: 投影機、麥克風)">
+            <input type="text" id="speaker-equip-${date}" placeholder="需求設備 (例: 投影機、麥克風、實物投影機)">
             <button class="btn-submit" onclick="claimSpeaker('${date}')">認領說書人</button>
           `;
         }
@@ -261,7 +262,7 @@
             <div class="role-desc">📸 職責：現場照相紀錄、引導及場控協助</div>
             <input type="text" id="helper-name-${date}" placeholder="請填全名 (例: 陳大明)">
             <input type="text" id="helper-line-${date}" placeholder="Line ID">
-            <input type="text" id="helper-class-${date}" placeholder="小孩班級 (例: 桂花班)">
+            <input type="text" id="helper-class-${date}" placeholder="小孩班級 (例: 桂花班 陳小花)">
             <input type="text" maxlength="4" id="helper-bday-${date}" placeholder="出生月日 4 碼 (例如 0521)">
             <button class="btn-submit" onclick="claimHelper('${date}')">認領小幫手</button>
           `;
@@ -318,10 +319,10 @@
           date: date, 
           name: name, 
           birthday: bday, 
-          lineId: lineId,
-          kidClass: kidClass,
-          book: book,
-          equip: equip
+          lineId: lineId, 
+          kidClass: kidClass, 
+          book: book, 
+          equip: equip 
         }, '🎉 認領說書人成功！');
       }
     }
@@ -344,8 +345,8 @@
           date: date, 
           name: name, 
           birthday: bday, 
-          lineId: lineId,
-          kidClass: kidClass
+          lineId: lineId, 
+          kidClass: kidClass 
         }, '🎉 認領小幫手成功！');
       }
     }
@@ -365,7 +366,7 @@
         action: 'editBook', 
         date: date, 
         newBook: newBook.trim(), 
-        newEquip: newEquip.trim(),
+        newEquip: newEquip.trim(), 
         birthday: bday.trim() 
       }, '✅ 書名與設備更新成功！');
     }
