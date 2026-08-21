@@ -120,7 +120,7 @@
     .claimed-row {
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items: flex-start;
       font-size: 0.9rem;
       margin-top: 4px;
     }
@@ -152,6 +152,7 @@
       <div class="note">
         🍎 <b>和平實小說書主題：健康</b>（請挑選與健康有關的故事）<br>
         ☀️ <b>活動時間</b>：週三大下課 10:40-11:10<br>
+        📢 <b>說書提醒</b>：說書人最晚請於<b>兩週前確認書名</b>，以利海報製作宣傳。<br>
         🎂 <b>認領說明</b>：請填寫<b>出生月日 4 碼</b>（如 0521），方便日後本人修改書名或取消認領。<br>
         
         <div class="note-section">
@@ -189,7 +190,7 @@
       container.innerHTML = '';
 
       dates.forEach(date => {
-        const info = slots[date] || { speaker: '', helper: '', book: '' };
+        const info = slots[date] || { speaker: '', helper: '', book: '', equip: '', sClass: '', hClass: '' };
         const card = document.createElement('div');
         card.className = 'card';
 
@@ -202,11 +203,12 @@
             </div>
             <div class="claimed-row">
               <div>
-                <b>${escapeHtml(info.speaker)}</b><br>
+                <b>${escapeHtml(info.speaker)}</b> ${info.sClass ? `<span style="color:#64748b; font-size:0.85rem;">(${escapeHtml(info.sClass)})</span>` : ''}<br>
                 <span style="font-size:0.85rem; color:#475569;">📖 書名：${escapeHtml(info.book) || '<span style="color:#d97706;">（待補）</span>'}</span>
+                ${info.equip ? `<br><span style="font-size:0.8rem; color:#64748b;">🛠️ 設備：${escapeHtml(info.equip)}</span>` : ''}
               </div>
-              <div>
-                <button class="btn-link btn-edit" onclick="editBook('${date}', '${escapeAttr(info.book)}')">改書名</button>
+              <div style="white-space: nowrap;">
+                <button class="btn-link btn-edit" onclick="editBook('${date}', '${escapeAttr(info.book)}', '${escapeAttr(info.equip)}')">修改</button>
                 <button class="btn-link" onclick="cancelRole('${date}', 'speaker')">取消</button>
               </div>
             </div>
@@ -217,9 +219,12 @@
               <span>👤 說書人</span>
               <span class="status-badge open">可認領</span>
             </div>
-            <input type="text" id="speaker-name-${date}" placeholder="說書人姓名">
+            <input type="text" id="speaker-name-${date}" placeholder="請填全名 (例: 王小美)">
+            <input type="text" id="speaker-line-${date}" placeholder="Line ID">
+            <input type="text" id="speaker-class-${date}" placeholder="小孩班級 (例: 201班 王小寶)">
             <input type="text" maxlength="4" id="speaker-bday-${date}" placeholder="出生月日 4 碼 (例如 0521)">
-            <input type="text" id="speaker-book-${date}" placeholder="預計書名">
+            <input type="text" id="speaker-book-${date}" placeholder="預計書名 (可後補)">
+            <input type="text" id="speaker-equip-${date}" placeholder="需求設備 (例: 投影機、麥克風、實物投影機)">
             <button class="btn-submit" onclick="claimSpeaker('${date}')">認領說書人</button>
           `;
         }
@@ -232,8 +237,12 @@
               <span class="status-badge closed">已認領</span>
             </div>
             <div class="claimed-row">
-              <b>${escapeHtml(info.helper)}</b>
-              <button class="btn-link" onclick="cancelRole('${date}', 'helper')">取消</button>
+              <div>
+                <b>${escapeHtml(info.helper)}</b> ${info.hClass ? `<span style="color:#64748b; font-size:0.85rem;">(${escapeHtml(info.hClass)})</span>` : ''}
+              </div>
+              <div style="white-space: nowrap;">
+                <button class="btn-link" onclick="cancelRole('${date}', 'helper')">取消</button>
+              </div>
             </div>
           `;
         } else {
@@ -242,7 +251,9 @@
               <span>🤝 小幫手</span>
               <span class="status-badge open">可認領</span>
             </div>
-            <input type="text" id="helper-name-${date}" placeholder="小幫手姓名">
+            <input type="text" id="helper-name-${date}" placeholder="請填全名 (例: 陳大明)">
+            <input type="text" id="helper-line-${date}" placeholder="Line ID">
+            <input type="text" id="helper-class-${date}" placeholder="小孩班級 (例: 102班 陳小花)">
             <input type="text" maxlength="4" id="helper-bday-${date}" placeholder="出生月日 4 碼 (例如 0521)">
             <button class="btn-submit" onclick="claimHelper('${date}')">認領小幫手</button>
           `;
@@ -281,38 +292,74 @@
 
     function claimSpeaker(date) {
       const name = document.getElementById(`speaker-name-${date}`).value.trim();
+      const lineId = document.getElementById(`speaker-line-${date}`).value.trim();
+      const kidClass = document.getElementById(`speaker-class-${date}`).value.trim();
       const bday = document.getElementById(`speaker-bday-${date}`).value.trim();
       const book = document.getElementById(`speaker-book-${date}`).value.trim();
+      const equip = document.getElementById(`speaker-equip-${date}`).value.trim();
 
-      if (!name) return alert('請填寫說書人姓名！');
+      if (!name) return alert('請填寫全名！');
+      if (!lineId) return alert('請填寫 Line ID 以利聯絡！');
+      if (!kidClass) return alert('請填寫小孩班級！');
       if (!bday || bday.length !== 4) return alert('請填寫出生月日 4 碼（例如 0521）！');
 
       if (confirm(`確定要認領【${date}】的說書人嗎？`)) {
-        sendApi({ action: 'claim', role: 'speaker', date: date, name: name, birthday: bday, book: book }, '🎉 認領說書人成功！');
+        sendApi({ 
+          action: 'claim', 
+          role: 'speaker', 
+          date: date, 
+          name: name, 
+          birthday: bday, 
+          lineId: lineId,
+          kidClass: kidClass,
+          book: book,
+          equip: equip
+        }, '🎉 認領說書人成功！');
       }
     }
 
     function claimHelper(date) {
       const name = document.getElementById(`helper-name-${date}`).value.trim();
+      const lineId = document.getElementById(`helper-line-${date}`).value.trim();
+      const kidClass = document.getElementById(`helper-class-${date}`).value.trim();
       const bday = document.getElementById(`helper-bday-${date}`).value.trim();
 
-      if (!name) return alert('請填寫小幫手姓名！');
+      if (!name) return alert('請填寫全名！');
+      if (!lineId) return alert('請填寫 Line ID 以利聯絡！');
+      if (!kidClass) return alert('請填寫小孩班級！');
       if (!bday || bday.length !== 4) return alert('請填寫出生月日 4 碼（例如 0521）！');
 
       if (confirm(`確定要認領【${date}】的小幫手嗎？`)) {
-        sendApi({ action: 'claim', role: 'helper', date: date, name: name, birthday: bday, book: '' }, '🎉 認領小幫手成功！');
+        sendApi({ 
+          action: 'claim', 
+          role: 'helper', 
+          date: date, 
+          name: name, 
+          birthday: bday, 
+          lineId: lineId,
+          kidClass: kidClass
+        }, '🎉 認領小幫手成功！');
       }
     }
 
-    function editBook(date, currentBook) {
-      const bday = prompt(`【${date}】修改書名\n請輸入當初登記的「說書人出生月日 4 碼」（如 0521）：`);
+    function editBook(date, currentBook, currentEquip) {
+      const bday = prompt(`【${date}】修改資料\n請輸入當初登記的「說書人出生月日 4 碼」（如 0521）：`);
       if (bday === null) return;
       if (!bday.trim()) return alert('請輸入出生月日！');
 
       const newBook = prompt('請輸入更新後的書名：', currentBook || '');
       if (newBook === null) return;
 
-      sendApi({ action: 'editBook', date: date, newBook: newBook.trim(), birthday: bday.trim() }, '✅ 書名更新成功！');
+      const newEquip = prompt('請輸入更新後的需求設備：', currentEquip || '');
+      if (newEquip === null) return;
+
+      sendApi({ 
+        action: 'editBook', 
+        date: date, 
+        newBook: newBook.trim(), 
+        newEquip: newEquip.trim(),
+        birthday: bday.trim() 
+      }, '✅ 書名與設備更新成功！');
     }
 
     function cancelRole(date, role) {
